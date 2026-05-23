@@ -36,3 +36,7 @@ dbt Transformations
 Snowflake Warehouse
     ↓
 Analytics Dashboard
+
+## Status
+
+Project initialization in progress.
