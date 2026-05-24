@@ -15,7 +15,7 @@ def transform_events():
 
     processed_count = 0
 
-    with open(output_file, "a", encoding="utf-8") as processed:
+    with open(output_file, "w", encoding="utf-8") as processed:
 
         for raw_file in RAW_PATH.rglob("*.jsonl"):
 
