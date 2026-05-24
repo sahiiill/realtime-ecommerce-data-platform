@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
 
   zookeeper:
@@ -13,12 +11,19 @@ services:
     ports:
       - "2181:2181"
 
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
 
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
 
     ports:
       - "9092:9092"
@@ -26,6 +31,58 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  airflow-webserver:
+      image: apache/airflow:2.9.1
+
+      container_name: airflow-webserver
+
+      depends_on:
+        - kafka
+
+      environment:
+        AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+        AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+
+      volumes:
+        - ./airflow/dags:/opt/airflow/dags
+        - ./airflow/logs:/opt/airflow/logs
+        - ./airflow/plugins:/opt/airflow/plugins
+        - airflow-db:/opt/airflow
+        - .:/opt/airflow/project
+      ports:
+        - "8080:8080"
+
+      command: webserver
+
+  airflow-scheduler:
+      image: apache/airflow:2.9.1
+
+      container_name: airflow-scheduler
+
+      depends_on:
+        - airflow-webserver
+
+      environment:
+        AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+        AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+
+      volumes:
+        - ./airflow/dags:/opt/airflow/dags
+        - ./airflow/logs:/opt/airflow/logs
+        - ./airflow/plugins:/opt/airflow/plugins
+        - airflow-db:/opt/airflow
+        - .:/opt/airflow/project
+
+      command: scheduler
+
+volumes:
+  airflow-db:

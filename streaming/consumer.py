@@ -1,22 +1,22 @@
 import json
-import logging
+import time
 from datetime import datetime
 from pathlib import Path
+from streaming.config import KAFKA_BROKER, KAFKA_TOPIC
+from streaming.logger import setup_logger
 
 from kafka import KafkaConsumer
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s"
-)
+logger = setup_logger("logs/consumer.log")
 
-logger = logging.getLogger(__name__)
+event_count = 0
+start_time = time.time()
 
-TOPIC_NAME = "ecommerce-events"
+
 
 consumer = KafkaConsumer(
-    TOPIC_NAME,
-    bootstrap_servers="localhost:9092",
+    KAFKA_TOPIC,
+    bootstrap_servers=KAFKA_BROKER,
     auto_offset_reset="earliest",
     enable_auto_commit=True,
     group_id="ecommerce-consumer-group",
@@ -44,9 +44,15 @@ for message in consumer:
     with open(output_path, "a") as file:
         file.write(json.dumps(event) + "\n")
 
+    event_count += 1
+
+    elapsed_time = time.time() - start_time
+    events_per_second = round(event_count / elapsed_time, 2)
+
     logger.info(
         f"Stored event: "
         f"{event['event_id']} | "
         f"{event['event_type']} | "
-        f"{event['product_name']}"
-    )
+        f"{event['product_name']} | "
+        f"Throughput: {events_per_second} events/sec"
+)

@@ -233,3 +233,28 @@ __pycache__/
 # Mac/Windows system files
 .DS_Store
 Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Airflow
+airflow/logs/
+airflow/*.db
+
+# Storage runtime data
+storage/raw/
+storage/processed/
+storage/failed_events/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Docker
+*.log
