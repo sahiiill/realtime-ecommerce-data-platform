@@ -61,13 +61,21 @@ PRODUCTS = [
 
 
 def generate_event():
-    event_type = random.choice(EVENT_TYPES)
+    event_type = random.choices(
+        EVENT_TYPES,
+        weights=[70, 20, 10],
+        k=1
+    )[0]
 
     return {
         "event_id": fake.uuid4(),
         "user_id": random.randint(1000, 9999),
         "event_type": event_type,
-        "product_name": random.choice(PRODUCTS),
+        "product_name": random.choices(
+            PRODUCTS,
+            weights=[35, 30, 10, 15, 10],
+            k=1
+        )[0],
         "price": round(random.uniform(50, 2500), 2),
         "quantity": random.randint(1, 5),
         "event_timestamp": datetime.utcnow().isoformat(),

@@ -65,11 +65,11 @@ col1, col2, col3, col4 = st.columns(4)
 
 col1.metric("Total Events", total_events)
 
-col2.metric("Total Revenue", f"${total_revenue}")
+col2.metric("Total Revenue", f"€{total_revenue}")
 
 col3.metric("Purchases", purchase_count)
 
-col4.metric("Average Order Value", f"${avg_order_value}")
+col4.metric("Average Order Value", f"€{avg_order_value}")
 
 
 st.divider()
